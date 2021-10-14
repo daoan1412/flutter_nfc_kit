@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   String _platformVersion =
       '${Platform.operatingSystem} ${Platform.operatingSystemVersion}';
   NFCAvailability _availability = NFCAvailability.not_supported;
+  final nfcKit = FlutterNfcKit();
   String? _result;
 
   @override
@@ -33,7 +34,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Future<void> initPlatformState() async {
     NFCAvailability availability;
     try {
-      availability = await FlutterNfcKit.nfcAvailability;
+      availability = await nfcKit.nfcAvailability;
     } on PlatformException {
       availability = NFCAvailability.not_supported;
     }
@@ -66,21 +67,28 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    await FlutterNfcKit.poll();
-                    await FlutterNfcKit.setIosAlertMessage("working on it...");
+                    await nfcKit.poll();
+                    await nfcKit.setIosAlertMessage("working on it...");
                   } catch (e) {
                     setState(() {
                       _result = 'error: $e';
                     });
                   }
-                  // Pretend that we are working
-                  var result1 = await FlutterNfcKit.transceive(
+                  // 00A40400 - tag
+                  // 07 - length of value
+                  // A0000002471001 - value
+                  final x1 = await nfcKit.transceive(
                       "00A404000CA000000063504B43532D3135");
-
+                  final x2 = await nfcKit.transceive(
+                      "00200081083132333435363738");
+                  final x3 = await nfcKit.transceive("00A40000026F00");
+                  // 00B0000000878696E206368616F
+                  final x4 = await nfcKit.transceive(
+                      "00B0000000878696E206368616F".toUpperCase());
                   setState(() {
-                    _result = 'sw1: ${result1.sw1}, sw2: ${result1.sw2}, data ${result1.data}';
+                    _result = 'sw1: ${x1.sw1}, sw2: ${x1.sw2}, data ${x1.data}';
                   });
-                  await FlutterNfcKit.finish(iosAlertMessage: "Finished!");
+                  await nfcKit.finish(iosAlertMessage: "Finished!");
                 },
                 child: Text('Start polling'),
               ),

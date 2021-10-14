@@ -69,14 +69,8 @@ public class SwiftFlutterNfcKitPlugin: NSObject, FlutterPlugin, NFCTagReaderSess
             if tag != nil {
                 let req = (call.arguments as? [String: Any?])?["data"]
                 if req != nil, req is String {
-                    var data: Data?
-                    switch req {
-                    case let hexReq as String:
-                        data = dataWithHexString(hex: hexReq)
-                    default:
-                        data = nil
-                    }
-
+                    var data: Data? = dataWithHexString(hex: req as! String)
+                    
                     switch tag {
                     case let .iso7816(tag):
                         var apdu: NFCISO7816APDU?

@@ -15,6 +15,8 @@ class ResponseAPDU {
   final String sw2;
   final String data;
 
+  bool get isSuccess => sw1 == "90" && sw2 == "00";
+
   const ResponseAPDU(
       {required this.sw1, required this.sw2, required this.data});
 
@@ -25,10 +27,10 @@ class ResponseAPDU {
 
 /// Main class of NFC Kit
 class FlutterNfcKit {
-  static const MethodChannel _channel = const MethodChannel('flutter_nfc_kit');
+   final MethodChannel _channel = const MethodChannel('flutter_nfc_kit');
 
   /// get the availablility of NFC reader on this device
-  static Future<NFCAvailability> get nfcAvailability async {
+   Future<NFCAvailability> get nfcAvailability async {
     final String availability =
         await _channel.invokeMethod('getNFCAvailability');
     return NFCAvailability.values
@@ -47,7 +49,7 @@ class FlutterNfcKit {
   /// On Android, set [androidPlatformSound] to control whether to play sound when a tag is polled,.
   ///
   ///
-  static Future<void> poll(
+  Future<void> poll(
       {Duration? timeout,
       bool androidPlatformSound = true,
       String iosAlertMessage = "Hold your iPhone near the card",
@@ -70,7 +72,7 @@ class FlutterNfcKit {
   /// Also, Ndef TagTechnology will be closed if active.
   /// On iOS, this parameter is ignored and is decided by the OS again.
   /// Timeout is reset to default value when [finish] is called, and could be changed by multiple calls to [transceive].
-  static Future<ResponseAPDU> transceive(String capdu,
+  Future<ResponseAPDU> transceive(String capdu,
       {Duration? timeout}) async {
     assert(capdu is String);
     dynamic res = await _channel.invokeMethod('transceive', {
@@ -87,7 +89,7 @@ class FlutterNfcKit {
   ///
   /// On iOS, use [iosAlertMessage] to indicate success or [iosErrorMessage] to indicate failure.
   /// If both parameters are set, [iosErrorMessage] will be used.
-  static Future<void> finish(
+  Future<void> finish(
       {String? iosAlertMessage, String? iosErrorMessage}) async {
     return await _channel.invokeMethod('finish', {
       'iosErrorMessage': iosErrorMessage,
@@ -98,7 +100,7 @@ class FlutterNfcKit {
   /// iOS only, change currently displayed NFC reader session alert message with [message].
   /// There must be a valid session when invoking.
   /// On Android, call to this function does nothing.
-  static Future<void> setIosAlertMessage(String message) async {
+  Future<void> setIosAlertMessage(String message) async {
     if (Platform.isIOS) {
       return await _channel.invokeMethod('setIosAlertMessage', message);
     }
